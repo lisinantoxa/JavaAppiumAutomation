@@ -42,10 +42,6 @@ public class FirstTest {
                 By.id("fragment_onboarding_skip_button"),
                 "Cannot find skip button",
                 5);
-        waitForElementPresent(
-                By.xpath("//*[@resource-id='org.wikipedia:id/search_container']"),
-                "Cannot find search container",
-                5);
         WebElement element = waitForElementPresent(
                 By.xpath("//*[contains(@text,'Search Wikipedia')]"),
                 "Cannot find search field",

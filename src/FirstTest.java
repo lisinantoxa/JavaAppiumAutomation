@@ -10,7 +10,12 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.awt.*;
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.sql.ClientInfoStatus;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FirstTest {
 
@@ -53,6 +58,35 @@ public class FirstTest {
         );
     }
 
+    @Test
+    public void testCancelSearch() {
+        waitForElementAndClick(
+                By.id("fragment_onboarding_skip_button"),
+                "Cannot find skip button",
+                5);
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text,'Search Wikipedia')]"),
+                "Cannot find search field",
+                5);
+        waitForElementAndSendKeys(
+                By.id("search_src_text"),
+                "Appium",
+                "Cannot find search input",
+                5);
+        waitForElementPresent(
+                By.xpath("//*[@resource-id='org.wikipedia:id/search_results_display']"),
+                "Search results still here",
+                5);
+        waitForElementAndClick(
+                By.xpath("//*[@content-desc='Navigate up']"),
+                "Cannot find back buttton",
+                5);
+        waitForElementNotPresent(
+                By.xpath("//*[@resource-id='org.wikipedia:id/search_results_display']"),
+                "Search results still here",
+                5);
+    }
+
     private WebElement waitForElementPresent(By by, String error_message, long timeoutInSec) {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSec);
         wait.withMessage(error_message + "\n");
@@ -73,5 +107,17 @@ public class FirstTest {
         WebElement element = waitForElementPresent(by, error_message, timeoutInSec);
         element.click();
         return element;
+    }
+
+    private WebElement waitForElementAndSendKeys(By by, String value, String error_message, long timeoutInSec) {
+        WebElement element = waitForElementPresent(by, error_message, timeoutInSec);
+        element.sendKeys(value);
+        return element;
+    }
+
+    private boolean waitForElementNotPresent(By by, String error_message, long timeoutInSec) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSec);
+        wait.withMessage(error_message + "\n");
+        return wait.until(ExpectedConditions.invisibilityOfElementLocated(by));
     }
 }

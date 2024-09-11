@@ -1,9 +1,14 @@
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URL;
 
@@ -32,8 +37,45 @@ public class FirstTest {
     }
 
     @Test
-    public void firstTest() {
-        System.out.println("first test run");
+    public void testSearchFieldText() {
+        waitForElementAndClick(
+                By.id("fragment_onboarding_skip_button"),
+                "Cannot find skip button",
+                5);
+        waitForElementPresent(
+                By.xpath("//*[@resource-id='org.wikipedia:id/search_container']"),
+                "Cannot find search container",
+                5);
+        WebElement element = waitForElementPresent(
+                By.xpath("//*[contains(@text,'Search Wikipedia')]"),
+                "Cannot find search field",
+                5);
+        assertElementHasText(
+                element,
+                "Search Wikipedia",
+                "Text in search field incorrect"
+        );
     }
 
+    private WebElement waitForElementPresent(By by, String error_message, long timeoutInSec) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSec);
+        wait.withMessage(error_message + "\n");
+        return wait.until(ExpectedConditions.presenceOfElementLocated(by));
+    }
+
+    private WebElement assertElementHasText(WebElement element, String expected_message, String error_message) {
+        String element_text = element.getAttribute("text");
+        Assert.assertEquals(
+                error_message,
+                expected_message,
+                element_text
+        );
+        return element;
+    }
+
+    private WebElement waitForElementAndClick(By by, String error_message, long timeoutInSec) {
+        WebElement element = waitForElementPresent(by, error_message, timeoutInSec);
+        element.click();
+        return element;
+    }
 }

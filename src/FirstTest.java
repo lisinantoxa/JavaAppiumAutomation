@@ -75,7 +75,7 @@ public class FirstTest {
                 5);
         waitForElementPresent(
                 By.xpath("//*[@resource-id='org.wikipedia:id/search_results_display']"),
-                "Search results still here",
+                "Cannot find search result",
                 5);
         waitForElementAndClick(
                 By.xpath("//*[@content-desc='Navigate up']"),

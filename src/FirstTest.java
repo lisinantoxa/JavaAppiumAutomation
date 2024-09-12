@@ -10,12 +10,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.awt.*;
-import java.lang.reflect.Array;
 import java.net.URL;
-import java.sql.ClientInfoStatus;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FirstTest {
 

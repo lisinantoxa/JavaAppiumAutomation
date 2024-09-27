@@ -236,6 +236,40 @@ public class FirstTest {
         );
     }
 
+    @Test
+    public void testArticleTitlePresent() {
+        String article = "Java (programming language)";
+        waitForElementAndClick(
+                By.id("fragment_onboarding_skip_button"),
+                "Cannot find skip button",
+                5);
+        waitForElementPresent(
+                By.xpath("//*[contains(@text,'Search Wikipedia')]"),
+                "Cannot find search field",
+                5);
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text,'Search Wikipedia')]"),
+                "Cannot find search field",
+                5);
+        waitForElementAndSendKeys(
+                By.id("search_src_text"),
+                "Java",
+                "Cannot find search input",
+                5);
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text,'"+ article +"')]"),
+                "Cannot find search result",
+                5);
+        assertElementPresent(By.xpath("//*[contains(@text,'"+ article +"')]"),
+                "Cannot find title " + article);
+    }
+
+    private WebElement assertElementPresent(By by, String error_message) {
+        List element = driver.findElements(by);
+        Assert.assertFalse(error_message, element.isEmpty());
+        return null;
+    }
+
     private WebElement waitForElementPresent(By by, String error_message, long timeoutInSec) {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSec);
         wait.withMessage(error_message + "\n");

@@ -4,13 +4,16 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URL;
+import java.time.Duration;
+import java.util.List;
 
 public class FirstTest {
 
@@ -147,6 +150,92 @@ public class FirstTest {
         );
     }
 
+    @Test
+    public void saveTwoArticleToMyListAndDeleteOne() {
+        String folder_name = "Test";
+        String first_article = "Java (programming language)";
+        String second_article = "Java version history";
+        waitForElementAndClick(
+                By.id("fragment_onboarding_skip_button"),
+                "Cannot find skip button",
+                5);
+        waitForElementPresent(
+                By.xpath("//*[contains(@text,'Search Wikipedia')]"),
+                "Cannot find search field",
+                5);
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text,'Search Wikipedia')]"),
+                "Cannot find search field",
+                5);
+        waitForElementAndSendKeys(
+                By.id("search_src_text"),
+                "Java",
+                "Cannot find search input",
+                5);
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text,'"+ first_article +"')]"),
+                "Cannot find search result",
+                5);
+        waitForElementAndClick(By.xpath("//*[@content-desc='Save']"),
+                "Cannot find Save button",
+                5);
+        waitForElementAndClick(By.xpath("//*[@text='Add to list']"),
+                "Cannot find save to list button",
+                5);
+        waitForElementAndSendKeys(By.xpath("//*[@resource-id='org.wikipedia:id/text_input']"),
+                folder_name,
+                "Cannot find text input",
+                5);
+        waitForElementAndClick(By.xpath("//*[@resource-id='android:id/button1']"),
+                "Cannot find Ok buttton",
+                5);
+        waitForElementAndClick(By.xpath("//*[@content-desc='Navigate up']"),
+                "Cannot find back button",
+                5);
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text,'"+ second_article +"')]"),
+                "Cannot find search result",
+                5);
+        waitForElementAndClick(By.xpath("//*[@content-desc='Save']"),
+                "Cannot find Save button",
+                5);
+        waitForElementAndClick(By.xpath("//*[@text='Add to list']"),
+                "Cannot find save to list button",
+                5);
+        waitForElementAndClick(By.xpath("//*[@text='"+ folder_name +"']"),
+                "Cannot find folder to save article",
+                5);
+        waitForElementAndClick(By.xpath("//*[@text='View list']"),
+                "Cannot find View List button",
+                5);
+        waitForElementPresent(
+                By.xpath("//*[contains(@text,'"+ first_article +"')]"),
+                "Cannot find article in list",
+                5);
+        waitForElementPresent(
+                By.xpath("//*[contains(@text,'"+ second_article +"')]"),
+                "Cannot find article in list",
+                5);
+        swipeElementToLeft(By.xpath("//*[@text = '"+ second_article +"']"),
+                "Cannot find search result",
+                300);
+        waitForElementNotPresent(By.xpath("//*[@text = '"+ second_article +"']"),
+                "Article is still here",
+                5);
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text,'"+ first_article +"')]"),
+                "Cannot find article in list",
+                5);
+        WebElement article = waitForElementPresent(
+                By.xpath("//*[@text = '"+ first_article +"']"),
+                "Cannot find search result",
+                5);
+        assertElementContainsText(
+                article,
+                first_article
+        );
+    }
+
     private WebElement waitForElementPresent(By by, String error_message, long timeoutInSec) {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSec);
         wait.withMessage(error_message + "\n");
@@ -186,4 +275,52 @@ public class FirstTest {
         wait.withMessage(error_message + "\n");
         return wait.until(ExpectedConditions.invisibilityOfElementLocated(by));
     }
+
+    protected void swipeUp(int ms) {
+        Dimension size =  driver.manage().window().getSize();
+        int x = size.width / 2;
+        int start_y = (int) (size.height * 0.8);
+        int end_y = (int) (size.height * 0.2);
+        PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+        Sequence scroll = new Sequence(finger, 0);
+        scroll.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), x, start_y));
+        scroll.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+        scroll.addAction(finger.createPointerMove(Duration.ofMillis(ms), PointerInput.Origin.viewport(), x, end_y));
+        scroll.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+        driver.perform(List.of(scroll));
+    }
+
+    protected void swipeUpQuick() {
+        swipeUp(1500);
+    }
+
+    protected void swipeUpToFindElement(By by, String error_message, int max_swipes) {
+        int swipes = 0;
+        while (driver.findElements(by).isEmpty()) {
+            if (swipes > max_swipes) {
+                waitForElementPresent(by, error_message, 0);
+                return;
+            }
+            ++swipes;
+            swipeUpQuick();
+        }
+    }
+
+    protected void swipeElementToLeft(By by, String error_message,int ms) {
+        WebElement element = waitForElementPresent(by,
+                error_message,
+                5);
+        Point sourceLocation = element.getLocation();
+        Dimension sourceSize = element.getSize();
+        int rightX = (int) (sourceLocation.getX() + sourceSize.getWidth() * 0.9);
+        int leftX = sourceLocation.getX();
+        int centerY = sourceLocation.getY() + sourceSize.getHeight() / 2;
+        PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+        Sequence scroll = new Sequence(finger, 0);
+        scroll.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), rightX, centerY));
+        scroll.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+        scroll.addAction(finger.createPointerMove(Duration.ofMillis(ms), PointerInput.Origin.viewport(), leftX, centerY));
+        scroll.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+        driver.perform(List.of(scroll));
+        }
 }

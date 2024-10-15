@@ -47,12 +47,6 @@ public class MainPageObject {
         return element;
     }
 
-//    public String assertElementContainsText(String element, String expected_text) {
-//        String element_text = element.getAttribute("text");
-//        Assert.assertTrue(element_text.contains(expected_text));
-//        return element;
-//    }
-
     public WebElement waitForElementAndClick(By by, String error_message, long timeoutInSec) {
         WebElement element = waitForElementPresent(by, error_message, timeoutInSec);
         element.click();

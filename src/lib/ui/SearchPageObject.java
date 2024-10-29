@@ -6,13 +6,15 @@ import org.openqa.selenium.By;
 public class SearchPageObject extends MainPageObject {
 
     private static final String
-        SEARCH_INIT_ELEMENT = "//*[contains(@text,'Search Wikipedia')]",
-        SEARCH_INPUT = "search_src_text",
-        BACK_BUTTON = "//*[@content-desc='Navigate up']",
-        SEARCH_DISPLAY = "//*[@resource-id='org.wikipedia:id/search_results_display']",
-        SEARCH_RESULT_BY_SUBSTRING_TPL = "//*[contains(@text,'{SUBSTRING}')]",
-        SEARCH_RESULT_BY_NUMBER_TPL = "(//*[@resource-id='org.wikipedia:id/page_list_item_title'])[{NUMBER}]";
+            SEARCH_INIT_ELEMENT = "//*[contains(@text,'Search Wikipedia')]",
+            SEARCH_INPUT = "search_src_text",
+            BACK_BUTTON = "//*[@content-desc='Navigate up']",
+            SEARCH_DISPLAY = "//*[@resource-id='org.wikipedia:id/search_results_display']",
+            SEARCH_RESULT_BY_SUBSTRING_TPL = "//*[contains(@text,'{SUBSTRING}')]",
+            SEARCH_RESULT_BY_NUMBER_TPL = "(//*[@resource-id='org.wikipedia:id/page_list_item_title'])[{NUMBER}]",
+            SEARCH_RESULT_WITH_TITLE_AND_DESCRIPTION_TPL = "//*[@text='{TITLE}']/ancestor::android.view.ViewGroup[.//*[@text='{DESCRIPTION}']][1]";
 
+    //    TEMPLATES METHODS
     private static String getResultSearchElement(String substring) {
         return SEARCH_RESULT_BY_SUBSTRING_TPL.replace("{SUBSTRING}", substring);
     }
@@ -21,8 +23,18 @@ public class SearchPageObject extends MainPageObject {
         return SEARCH_RESULT_BY_NUMBER_TPL.replace("{NUMBER}", number);
     }
 
+    private static String getSearchResultWithTitleAndDescription(String title, String description) {
+        return SEARCH_RESULT_WITH_TITLE_AND_DESCRIPTION_TPL.replace("{TITLE}", title).replace("{DESCRIPTION}", description);
+    }
+//    TEMPLATES METHODS
+
     public SearchPageObject(AppiumDriver driver) {
         super(driver);
+    }
+
+    public void waitForElementByTitleAndDescription(String title, String description) {
+        String title_and_description_xpath = getSearchResultWithTitleAndDescription(title, description);
+        this.waitForElementPresent(By.xpath(title_and_description_xpath), "Cannot find title and description element", 5);
     }
 
     public void initSearchInput() {
@@ -31,7 +43,7 @@ public class SearchPageObject extends MainPageObject {
     }
 
     public void typeSearchLine(String search_line) {
-        this.waitForElementAndSendKeys(By.id(SEARCH_INPUT), search_line,"Cannot find and type into search input", 5);
+        this.waitForElementAndSendKeys(By.id(SEARCH_INPUT), search_line, "Cannot find and type into search input", 5);
     }
 
     public void waitForSearchResult(String substring) {
@@ -48,7 +60,7 @@ public class SearchPageObject extends MainPageObject {
     }
 
     public void cancelSearch() {
-        this.waitForElementAndClick(By.xpath(BACK_BUTTON),"Cannot find back buttton",5);
+        this.waitForElementAndClick(By.xpath(BACK_BUTTON), "Cannot find back buttton", 5);
     }
 
     public void clickByArticleBySubstring(String substring) {
@@ -58,6 +70,6 @@ public class SearchPageObject extends MainPageObject {
 
     public String getSearchResultByListItem(String number) {
         String number_xpath = getResultSearchByNumber(number);
-        return this.waitForElementPresent(By.xpath(number_xpath),"Cannot find search result by list item", 5).getAttribute("text");
+        return this.waitForElementPresent(By.xpath(number_xpath), "Cannot find search result by list item", 5).getAttribute("text");
     }
 }

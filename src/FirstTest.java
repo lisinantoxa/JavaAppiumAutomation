@@ -99,4 +99,15 @@ public class FirstTest extends CoreTestCase {
         String title = ArticlePageObject.getArticleTitle(article);
         assertEquals("We see unexpected result", article, title);
     }
+
+    @Test
+    public void testArticleTitleAndDescriptionPresent() {
+        SearchPageObject SearchPageObject = new SearchPageObject(driver);
+        MainPageObject.skipOnboarding();
+        SearchPageObject.initSearchInput();
+        SearchPageObject.typeSearchLine("Java");
+        SearchPageObject.waitForElementByTitleAndDescription("Java", "Island in Indonesia");
+        SearchPageObject.waitForElementByTitleAndDescription("Java (programming language)", "Object-oriented programming language");
+        SearchPageObject.waitForElementByTitleAndDescription("JavaScript", "High-level programming language");
+    }
 }

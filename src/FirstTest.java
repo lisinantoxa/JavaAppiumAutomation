@@ -1,52 +1,29 @@
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import lib.CoreTestCase;
+import lib.ui.ArticlePageObject;
+import lib.ui.MainPageObject;
+import lib.ui.MyListPageObject;
+import lib.ui.SearchPageObject;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.*;
 
-import java.net.URL;
+public class FirstTest extends CoreTestCase {
 
-public class FirstTest {
+    private MainPageObject MainPageObject;
 
-    private AppiumDriver driver;
+    protected void setUp() throws Exception {
+        super.setUp();
 
-    @Before
-    public void setUp() throws Exception {
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-
-        capabilities.setCapability("platformName", "Android");
-        capabilities.setCapability("deviceName", "Test");
-        capabilities.setCapability("platformVersion", "14");
-        capabilities.setCapability("automationName", "UiAutomator2");
-        capabilities.setCapability("appPackage", "org.wikipedia");
-        capabilities.setCapability("appActivity", ".main.MainActivity");
-        capabilities.setCapability("app", "C:\\Users\\user\\Desktop\\JavaAppiumAutomation\\JavaAppiumAutomation\\apks\\Wikipedia2.7.5.apk");
-
-        driver = new AndroidDriver(new URL("http://127.0.0.1:4723"), capabilities);
-    }
-
-    @After
-    public void tearDown() {
-        driver.quit();
+        MainPageObject = new MainPageObject(driver);
     }
 
     @Test
     public void testSearchFieldText() {
-        waitForElementAndClick(
-                By.id("fragment_onboarding_skip_button"),
-                "Cannot find skip button",
-                5);
-        WebElement element = waitForElementPresent(
+        MainPageObject.skipOnboarding();
+        WebElement element = MainPageObject.waitForElementPresent(
                 By.xpath("//*[contains(@text,'Search Wikipedia')]"),
                 "Cannot find search field",
                 5);
-        assertElementHasText(
+        MainPageObject.assertElementHasText(
                 element,
                 "Search Wikipedia",
                 "Text in search field incorrect"
@@ -55,135 +32,82 @@ public class FirstTest {
 
     @Test
     public void testCancelSearch() {
-        waitForElementAndClick(
-                By.id("fragment_onboarding_skip_button"),
-                "Cannot find skip button",
-                5);
-        waitForElementAndClick(
-                By.xpath("//*[contains(@text,'Search Wikipedia')]"),
-                "Cannot find search field",
-                5);
-        waitForElementAndSendKeys(
-                By.id("search_src_text"),
-                "Appium",
-                "Cannot find search input",
-                5);
-        waitForElementPresent(
-                By.xpath("//*[@resource-id='org.wikipedia:id/search_results_display']"),
-                "Cannot find search result",
-                5);
-        waitForElementAndClick(
-                By.xpath("//*[@content-desc='Navigate up']"),
-                "Cannot find back buttton",
-                5);
-        waitForElementNotPresent(
-                By.xpath("//*[@resource-id='org.wikipedia:id/search_results_display']"),
-                "Search results still here",
-                5);
+        SearchPageObject SearchPageObject = new SearchPageObject(driver);
+        MainPageObject.skipOnboarding();
+        SearchPageObject.initSearchInput();
+        SearchPageObject.typeSearchLine("Appium");
+        SearchPageObject.waitForSearchResultDisplayAppear();
+        SearchPageObject.cancelSearch();
+        SearchPageObject.waitForSearchResultDisplayDisappear();
     }
 
     @Test
     public void testSearchResultText() {
-        waitForElementAndClick(
-                By.id("fragment_onboarding_skip_button"),
-                "Cannot find skip button",
-                5);
-        waitForElementAndClick(
-                By.xpath("//*[contains(@text,'Search Wikipedia')]"),
-                "Cannot find search field",
-                5);
-        waitForElementAndSendKeys(
-                By.id("search_src_text"),
-                "Java",
-                "Cannot find search input",
-                5);
-        WebElement first_article = waitForElementPresent(
-                By.xpath("(//*[@resource-id='org.wikipedia:id/page_list_item_title'])[1]"),
-                "Cannot find search result",
-                5);
-        assertElementContainsText(
-                first_article,
-                "Java"
-        );
-        WebElement second_article = waitForElementPresent(
-                By.xpath("(//*[@resource-id='org.wikipedia:id/page_list_item_title'])[2]"),
-                "Cannot find search result",
-                5);
-        assertElementContainsText(
-                second_article,
-                "Java"
-        );
-        WebElement third_article = waitForElementPresent(
-                By.xpath("(//*[@resource-id='org.wikipedia:id/page_list_item_title'])[3]"),
-                "Cannot find search result",
-                5);
-        assertElementContainsText(
-                third_article,
-                "Java"
-        );
-        WebElement fourth_article = waitForElementPresent(
-                By.xpath("(//*[@resource-id='org.wikipedia:id/page_list_item_title'])[4]"),
-                "Cannot find search result",
-                5);
-        assertElementContainsText(
-                fourth_article,
-                "Java"
-        );
-        WebElement fifth_article = waitForElementPresent(
-                By.xpath("(//*[@resource-id='org.wikipedia:id/page_list_item_title'])[5]"),
-                "Cannot find search result",
-                5);
-        assertElementContainsText(
-                fifth_article,
-                "Java"
-        );
-        WebElement sixth_article = waitForElementPresent(
-                By.xpath("(//*[@resource-id='org.wikipedia:id/page_list_item_title'])[6]"),
-                "Cannot find search result",
-                5);
-        assertElementContainsText(
-                sixth_article,
-                "Java"
-        );
+        SearchPageObject SearchPageObject = new SearchPageObject(driver);
+        MainPageObject.skipOnboarding();
+        SearchPageObject.initSearchInput();
+        SearchPageObject.typeSearchLine("Java");
+        String first_article = SearchPageObject.getSearchResultByListItem("1");
+        String second_article = SearchPageObject.getSearchResultByListItem("2");
+        String third_article = SearchPageObject.getSearchResultByListItem("3");
+        String fourth = SearchPageObject.getSearchResultByListItem("4");
+        String fifth_article = SearchPageObject.getSearchResultByListItem("5");
+        String[] search_results =
+                { first_article, second_article, third_article, fourth, fifth_article};
+        for (String search_result : search_results) {
+            assertTrue(search_result.contains("Java"));
+        }
     }
 
-    private WebElement waitForElementPresent(By by, String error_message, long timeoutInSec) {
-        WebDriverWait wait = new WebDriverWait(driver, timeoutInSec);
-        wait.withMessage(error_message + "\n");
-        return wait.until(ExpectedConditions.presenceOfElementLocated(by));
+    @Test
+    public void testSaveTwoArticleToMyListAndDeleteOne() {
+        String folder_name = "Test";
+        String first_article = "Java (programming language)";
+        String second_article = "Java version history";
+        SearchPageObject SearchPageObject = new SearchPageObject(driver);
+        ArticlePageObject ArticlePageObject = new ArticlePageObject(driver);
+        MyListPageObject MyListPageObject = new MyListPageObject(driver);
+        MainPageObject.skipOnboarding();
+        SearchPageObject.initSearchInput();
+        SearchPageObject.typeSearchLine("Java");
+        SearchPageObject.waitForSearchResult(first_article);
+        SearchPageObject.clickByArticleBySubstring(first_article);
+        ArticlePageObject.saveArticleToMyNewList(folder_name);
+        ArticlePageObject.exitFromArticleBackToSearch();
+        SearchPageObject.waitForSearchResult(second_article);
+        SearchPageObject.clickByArticleBySubstring(second_article);
+        ArticlePageObject.saveArticleToMyList(folder_name);
+        ArticlePageObject.clickViewLists();
+        MyListPageObject.assertArticleInList(first_article);
+        MyListPageObject.assertArticleInList(second_article);
+        MyListPageObject.swipeArticleToDelete(second_article);
+        MyListPageObject.openArticleFromList(first_article);
+        String title = ArticlePageObject.getArticleTitle(first_article);
+        assertEquals("We see unexpected result", first_article, title);
     }
 
-    private WebElement assertElementHasText(WebElement element, String expected_text, String error_message) {
-        String element_text = element.getAttribute("text");
-        Assert.assertEquals(
-                error_message,
-                expected_text,
-                element_text
-        );
-        return element;
+    @Test
+    public void testArticleTitlePresent() {
+        String article = "Java (programming language)";
+        SearchPageObject SearchPageObject = new SearchPageObject(driver);
+        ArticlePageObject ArticlePageObject = new ArticlePageObject(driver);
+        MainPageObject.skipOnboarding();
+        SearchPageObject.initSearchInput();
+        SearchPageObject.typeSearchLine("Java");
+        SearchPageObject.waitForSearchResult(article);
+        SearchPageObject.clickByArticleBySubstring(article);
+        String title = ArticlePageObject.getArticleTitle(article);
+        assertEquals("We see unexpected result", article, title);
     }
 
-    private WebElement assertElementContainsText(WebElement element, String expected_text) {
-        String element_text = element.getAttribute("text");
-        Assert.assertTrue(element_text.contains(expected_text));
-        return element;
-    }
-
-    private WebElement waitForElementAndClick(By by, String error_message, long timeoutInSec) {
-        WebElement element = waitForElementPresent(by, error_message, timeoutInSec);
-        element.click();
-        return element;
-    }
-
-    private WebElement waitForElementAndSendKeys(By by, String value, String error_message, long timeoutInSec) {
-        WebElement element = waitForElementPresent(by, error_message, timeoutInSec);
-        element.sendKeys(value);
-        return element;
-    }
-
-    private boolean waitForElementNotPresent(By by, String error_message, long timeoutInSec) {
-        WebDriverWait wait = new WebDriverWait(driver, timeoutInSec);
-        wait.withMessage(error_message + "\n");
-        return wait.until(ExpectedConditions.invisibilityOfElementLocated(by));
+    @Test
+    public void testArticleTitleAndDescriptionPresent() {
+        SearchPageObject SearchPageObject = new SearchPageObject(driver);
+        MainPageObject.skipOnboarding();
+        SearchPageObject.initSearchInput();
+        SearchPageObject.typeSearchLine("Java");
+        SearchPageObject.waitForElementByTitleAndDescription("Java", "Island in Indonesia");
+        SearchPageObject.waitForElementByTitleAndDescription("Java (programming language)", "Object-oriented programming language");
+        SearchPageObject.waitForElementByTitleAndDescription("JavaScript", "High-level programming language");
     }
 }
